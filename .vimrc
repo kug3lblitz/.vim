@@ -6,15 +6,15 @@
  endif
 
 " Required:
-set runtimepath+=/Users/wernerp/.vim/dein/repos/github.com/Shougo/dein.vim
+set runtimepath+=/your_home_directory/.vim/dein/repos/github.com/Shougo/dein.vim
 
 " Required:
-if dein#load_state('/Users/wernerp/.vim/dein')
-  call dein#begin('/Users/wernerp/.vim/dein')
+if dein#load_state('/your_home_directory/.vim/dein')
+  call dein#begin('/your_home_directory/.vim/dein')
 
   " Let dein manage dein
   " Required:
-  call dein#add('/Users/wernerp/.vim/dein/repos/github.com/Shougo/dein.vim')
+  call dein#add('/your_home_directory/.vim/dein/repos/github.com/Shougo/dein.vim')
 
   " Add or remove your plugins here:
   call dein#add('ctrlpvim/ctrlp.vim')
@@ -141,7 +141,7 @@ endif
 
 " unicode symbols
 let g:airline_left_sep = '»'
-let g:airline_left_sep = '▶'
+let g:airline_left_sep = '▶ '
 let g:airline_right_sep = '«'
 let g:airline_right_sep = '◀'
 let g:airline_symbols.linenr = '␊'
