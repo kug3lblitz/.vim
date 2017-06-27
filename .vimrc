@@ -93,7 +93,7 @@ syntax enable
 "let g:solarized_contrast = "high"
 "let g:solarized_termtrans = 1
 set background=dark
-colorscheme gruvbox
+colorscheme vividchalk
 let g:gruvbox_termcolors=256
 set noswapfile
 
@@ -110,7 +110,7 @@ set listchars=tab:}.,trail:≠,nbsp:•,precedes:…,extends:↲
 "the line below will toggle airline
 
 set laststatus=2
-let g:airline_theme='term'
+let g:airline_theme='jellybeans'
 set t_Co=256
 "let g:airline_powerline_fonts = 1
 "let g:Powerline_symbols = 'fancy'
