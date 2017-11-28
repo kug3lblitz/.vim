@@ -7,9 +7,9 @@
 * `ln -s ~/.vim ~/.config/nvim`
 * `ln -s ~/.vimrc ~/.config/nvim/init.vim` (linux only)
 #### if you're on a mac, do not link init.vim. Instead, init.vim should contain
-* ` set runtimepath^=~/.vim runtimepath+=~/.vim/after
-    let &packpath = &runtimepath
-    source ~/.vimrc`
+* ` set runtimepath^=~/.vim runtimepath+=~/.vim/after`
+* ` let &packpath = &runtimepath`
+* ` source ~/.vimrc`
 
 ### 3. Run Installer.sh to install dein
 
