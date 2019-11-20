@@ -1,32 +1,15 @@
-PATH := ./vim-themis/bin:$(PATH)
-export THEMIS_VIM  := nvim
-export THEMIS_ARGS := -e -s --headless
-export THEMIS_HOME := ./vim-themis
+all : emmet-vim.zip
 
+remove-zip:
+	-rm doc/tags
+	-rm emmet-vim.zip
 
-install: vim-themis
-	pip install neovim --upgrade
-	pip install pytest --upgrade
-	pip install flake8 --upgrade
-	pip install mypy-lang --upgrade
-	pip install vim-vint --upgrade
+emmet-vim.zip: remove-zip
+	zip -r emmet-vim.zip autoload plugin doc
 
-lint:
-	vint --version
-	vint plugin
-	vint autoload
-	flake8 --version
-	flake8 rplugin/python3/deoplete
-	mypy --version
-	mypy --silent-imports rplugin/python3/deoplete
+release: emmet-vim.zip
+	vimup update-script emmet.vim
 
 test:
-	themis --version
-	themis test/autoload/*
-	pytest --version
-	pytest
-
-vim-themis:
-	git clone https://github.com/thinca/vim-themis vim-themis
-
-.PHONY: install lint test
+	@-rm -f test.log 2> /dev/null
+	@vim -N -c "let &rtp .= ',' . getcwd()" -c "so unittest.vim" -c EmmetUnitTest! || cat test.log || exit 1

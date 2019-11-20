@@ -6,25 +6,30 @@
 import sys
 import time
 import logging
+import typing
+
+from deoplete.util import Nvim
 
 from functools import wraps
 from collections import defaultdict
 
-log_format = '%(asctime)s %(levelname)-8s (%(name)s) %(message)s'
+log_format = '%(asctime)s %(levelname)-8s [%(process)d] (%(name)s) %(message)s'
 log_message_cooldown = 0.5
 
 root = logging.getLogger('deoplete')
 root.propagate = False
 init = False
 
+FUNC = typing.Callable[..., typing.Any]
 
-def getLogger(name):
+
+def getLogger(name: str) -> logging.Logger:
     """Get a logger that is a child of the 'root' logger.
     """
     return root.getChild(name)
 
 
-def setup(vim, level, output_file=None):
+def setup(vim: Nvim, level: str, output_file: str = '') -> None:
     """Setup logging for Deoplete
     """
     global init
@@ -48,29 +53,35 @@ def setup(vim, level, output_file=None):
         try:
             import pkg_resources
 
-            neovim_version = pkg_resources.get_distribution('neovim').version
-        except ImportError:
-            neovim_version = 'unknown'
+            pynvim_version = pkg_resources.get_distribution('pynvim').version
+        except Exception:
+            pynvim_version = 'unknown'
 
         log = getLogger('logging')
         log.info('--- Deoplete Log Start ---')
-        log.info('%s, Python %s, neovim client %s',
+        log.info('%s, Python %s, pynvim %s',
                  vim.call('deoplete#util#neovim_version'),
                  '.'.join(map(str, sys.version_info[:3])),
-                 neovim_version)
-        vim.call('deoplete#util#print_warning', 'Logging to %s' % output_file)
+                 pynvim_version)
+
+        if 'deoplete#_logging_notified' not in vim.vars:
+            vim.vars['deoplete#_logging_notified'] = 1
+            vim.call('deoplete#util#print_debug', 'Logging to %s' % (
+                output_file))
 
 
-def logmethod(func):
+def logmethod(func: FUNC) -> typing.Callable[[FUNC], FUNC]:
     """Decorator for setting up the logger in LoggingMixin subclasses.
 
     This does not guarantee that log messages will be generated.  If
-    `LoggingMixin.debug_enabled` is True, it will be propagated up to the root
-    'deoplete' logger.
+    `LoggingMixin.is_debug_enabled` is True, it will be propagated up to the
+    root 'deoplete' logger.
     """
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
-        if not init or not self.debug_enabled:
+    def wrapper(self,  # type: ignore
+                *args: typing.Any,
+                **kwargs: typing.Any) -> typing.Any:
+        if not init or not self.is_debug_enabled:
             return
         if self._logger is None:
             self._logger = getLogger(getattr(self, 'name', 'unknown'))
@@ -81,45 +92,51 @@ def logmethod(func):
 class LoggingMixin(object):
     """Class that adds logging functions to a subclass.
     """
-    debug_enabled = False
+    is_debug_enabled = False
     _logger = None  # type: logging.Logger
 
     @logmethod
-    def debug(self, msg, *args, **kwargs):
+    def debug(self, msg: str,
+              *args: typing.Any, **kwargs: typing.Any) -> None:
         self._logger.debug(msg, *args, **kwargs)
 
     @logmethod
-    def info(self, msg, *args, **kwargs):
+    def info(self, msg: str,
+             *args: typing.Any, **kwargs: typing.Any) -> None:
         self._logger.info(msg, *args, **kwargs)
 
     @logmethod
-    def warning(self, msg, *args, **kwargs):
+    def warning(self, msg: str,
+                *args: typing.Any, **kwargs: typing.Any) -> None:
         self._logger.warning(msg, *args, **kwargs)
     warn = warning
 
     @logmethod
-    def error(self, msg, *args, **kwargs):
+    def error(self, msg: str,
+              *args: typing.Any, **kwargs: typing.Any) -> None:
         self._logger.error(msg, *args, **kwargs)
 
     @logmethod
-    def exception(self, msg, *args, **kwargs):
+    def exception(self, msg: str,
+                  *args: typing.Any, **kwargs: typing.Any) -> None:
         # This will not produce a log message if there is no exception to log.
         self._logger.exception(msg, *args, **kwargs)
 
     @logmethod
-    def critical(self, msg, *args, **kwargs):
+    def critical(self, msg: str,
+                 *args: typing.Any, **kwargs: typing.Any) -> None:
         self._logger.critical(msg, *args, **kwargs)
     fatal = critical
 
 
 class DeopleteLogFilter(logging.Filter):
-    def __init__(self, vim, name=''):
+    def __init__(self, vim: Nvim, name: str = ''):
         self.vim = vim
-        self.counter = defaultdict(int)
-        self.last_message_time = 0
-        self.last_message = None
+        self.counter: typing.Dict[str, int] = defaultdict(int)
+        self.last_message_time: float = 0
+        self.last_message: typing.Tuple[typing.Any, ...] = ()
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         t = time.time()
         elapsed = t - self.last_message_time
         self.last_message_time = t
@@ -136,7 +153,8 @@ class DeopleteLogFilter(logging.Filter):
                 # Only permit 2 errors in succession from a logging source to
                 # display errors inside of Neovim.  After this, it is no longer
                 # permitted to emit any more errors and should be addressed.
-                self.vim.call('deoplete#util#print_error', record.getMessage())
+                self.vim.call('deoplete#util#print_error', record.getMessage(),
+                              record.name)
             if record.exc_info and record.stack_info:
                 # Add a penalty for messages that generate exceptions to avoid
                 # making the log harder to read with doubled stack traces.

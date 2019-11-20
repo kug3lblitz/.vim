@@ -6,15 +6,15 @@
  endif
 
 " Required:
-set runtimepath+=/your_home_directory/.vim/dein/repos/github.com/Shougo/dein.vim
+set runtimepath+=/home/patrick/.vim/dein/repos/github.com/Shougo/dein.vim
 
 " Required:
-if dein#load_state('/your_home_directory/.vim/dein')
-  call dein#begin('/your_home_directory/.vim/dein')
+if dein#load_state('/home/patrick/.vim/dein')
+  call dein#begin('/home/patrick/.vim/dein')
 
   " Let dein manage dein
   " Required:
-  call dein#add('/your_home_directory/.vim/dein/repos/github.com/Shougo/dein.vim')
+  call dein#add('/home/patrick/.vim/dein/repos/github.com/Shougo/dein.vim')
 
   " Add or remove your plugins here:
   call dein#add('ctrlpvim/ctrlp.vim')
@@ -93,7 +93,7 @@ syntax enable
 "let g:solarized_contrast = "high"
 "let g:solarized_termtrans = 1
 set background=dark
-colorscheme jellybeans
+colorscheme dracula
 let g:gruvbox_termcolors=256
 set noswapfile
 
@@ -110,7 +110,7 @@ set listchars=tab:}.,trail:≠,nbsp:•,precedes:…,extends:↲
 "the line below will toggle airline
 
 set laststatus=2
-let g:airline_theme='jet'
+let g:airline_theme='dracula'
 set t_Co=256
 "let g:airline_powerline_fonts = 1
 "let g:Powerline_symbols = 'fancy'

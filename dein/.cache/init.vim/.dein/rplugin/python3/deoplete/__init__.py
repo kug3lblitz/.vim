@@ -3,70 +3,69 @@
 # AUTHOR: Shougo Matsushita <Shougo.Matsu at gmail.com>
 # License: MIT license
 # ============================================================================
-import os
-import re
 
-from glob import glob
+import typing
 
-import neovim
-
-from deoplete import logger
+from importlib.util import find_spec
 from deoplete.deoplete import Deoplete
+from deoplete.util import Nvim
 
 
-@neovim.plugin
-class DeopleteHandlers(object):
+if find_spec('yarp'):
+    import vim
+elif find_spec('pynvim'):
+    import pynvim as vim
+else:
+    import neovim as vim
 
-    def __init__(self, vim):
-        self._vim = vim
+Context = typing.Dict[str, typing.Any]
 
-    @neovim.function('_deoplete', sync=True)
-    def init_python(self, args):
-        self._deoplete = Deoplete(self._vim)
-        self._vim.vars['deoplete#_channel_id'] = self._vim.channel_id
+if hasattr(vim, 'plugin'):
+    # Neovim only
 
-        # Check neovim-python version.
-        try:
-            import pkg_resources
-            version = [pkg_resources.get_distribution('neovim').version]
-        except Exception:
-            # Since neovim-client version 0.1.11
-            if hasattr(neovim, 'VERSION'):
-                version = ['{major}.{minor}.{patch}{prerelease}'.format(
-                    major=neovim.VERSION.major,
-                    minor=neovim.VERSION.minor,
-                    patch=neovim.VERSION.patch,
-                    prerelease=getattr(neovim.VERSION, 'prerelease', '')
-                )]
-            else:
-                version = []
-                python_dir = os.path.dirname(os.path.dirname(neovim.__file__))
-                base = python_dir + '/neovim-*/'
-                meta_files = glob(base + 'PKG-INFO') + glob(base + '/METADATA')
-                for metadata in meta_files:
-                    with open(metadata, 'r', errors='replace') as f:
-                        for line in f:
-                            m = re.match('Version: (.+)', line)
-                            if m:
-                                version.append(m.group(1))
-        self._vim.vars['deoplete#_neovim_python_version'] = version
+    @vim.plugin
+    class DeopleteHandlers(object):
 
-    @neovim.rpc_export('deoplete_enable_logging')
-    def enable_logging(self, level, logfile):
-        logger.setup(self._vim, level, logfile)
-        self._deoplete.debug_enabled = True
+        def __init__(self, vim: Nvim):
+            self._vim = vim
 
-    @neovim.rpc_export('deoplete_auto_completion_begin')
-    def completion_begin(self, context):
-        context['rpc'] = 'deoplete_auto_completion_begin'
-        self._deoplete.completion_begin(context)
+        @vim.function('_deoplete_init', sync=False)  # type: ignore
+        def init_channel(self,
+                         args: typing.List[typing.Any]) -> None:
+            self._deoplete = Deoplete(self._vim)
 
-    @neovim.rpc_export('deoplete_manual_completion_begin')
-    def manual_completion_begin(self, context):
-        context['rpc'] = 'deoplete_manual_completion_begin'
-        self._deoplete.completion_begin(context)
+        @vim.rpc_export('deoplete_enable_logging')  # type: ignore
+        def enable_logging(self, context: Context) -> None:
+            self._deoplete.enable_logging()
 
-    @neovim.rpc_export('deoplete_on_event')
-    def on_event(self, context):
-        context['rpc'] = 'deoplete_on_event'
-        self._deoplete.on_event(context)
+        @vim.rpc_export('deoplete_auto_completion_begin')  # type: ignore
+        def auto_completion_begin(self, context: Context) -> None:
+            self._deoplete.completion_begin(context)
+
+        @vim.rpc_export('deoplete_manual_completion_begin')  # type: ignore
+        def manual_completion_begin(self, context: Context) -> None:
+            self._deoplete.completion_begin(context)
+
+        @vim.rpc_export('deoplete_on_event')  # type: ignore
+        def on_event(self, context: Context) -> None:
+            self._deoplete.on_event(context)
+
+
+if find_spec('yarp'):
+
+    global_deoplete = Deoplete(vim)
+
+    def deoplete_init() -> None:
+        pass
+
+    def deoplete_enable_logging(context: Context) -> None:
+        global_deoplete.enable_logging()
+
+    def deoplete_auto_completion_begin(context: Context) -> None:
+        global_deoplete.completion_begin(context)
+
+    def deoplete_manual_completion_begin(context: Context) -> None:
+        global_deoplete.completion_begin(context)
+
+    def deoplete_on_event(context: Context) -> None:
+        global_deoplete.on_event(context)

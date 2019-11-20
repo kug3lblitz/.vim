@@ -4,17 +4,18 @@
 # License: MIT license
 # ============================================================================
 
-from .base import Base
+from deoplete.base.filter import Base
+from deoplete.util import Nvim, UserContext, Candidates
 
 
 class Filter(Base):
 
-    def __init__(self, vim):
-        Base.__init__(self, vim)
+    def __init__(self, vim: Nvim) -> None:
+        super().__init__(vim)
 
         self.name = 'sorter_word'
         self.description = 'word sorter'
 
-    def filter(self, context):
+    def filter(self, context: UserContext) -> Candidates:
         return sorted(context['candidates'],
-                      key=lambda x: x['word'])
+                      key=lambda x: x['word'].swapcase())

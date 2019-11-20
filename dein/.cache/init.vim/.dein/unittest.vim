@@ -1,5 +1,6 @@
 " {{{
 let s:sfile = expand('<sfile>')
+let s:logging = 0
 
 function! s:reload(d)
   exe 'so' a:d.'/plugin/emmet.vim'
@@ -8,22 +9,32 @@ function! s:reload(d)
   endfor
 endfunction
 
+function! s:logn(msg)
+  echon a:msg
+  call writefile([a:msg, ''], "test.log", "ab")
+endfunction
+
+function! s:log(msg)
+  echo a:msg
+  call writefile(split(a:msg, "\n"), "test.log", "ab")
+endfunction
+
 function! s:show_type(type)
-  echohl Search | echon '[' a:type "]\n" | echohl None
+  echohl Search | call s:log('['.a:type.']') | echohl None
   echo "\r"
 endfunction
 
 function! s:show_category(category)
-  echohl MatchParen | echon '[' a:category "]\n" | echohl None
+  echohl MatchParen | call s:log('['.a:category.']') | echohl None
   echo "\r"
 endfunction
 
 function! s:show_pass(pass)
-  echohl Title | echo 'pass'.a:pass."\n" | echohl None
+  echohl Title | call s:log('pass '.substitute(a:pass, '\s', '', 'g')) | echohl None
 endfunction
 
 function! s:show_done()
-  echohl IncSearch | echo 'done' | echohl None
+  echohl IncSearch | call s:log('done') | echohl None
 endfunction
 
 function! s:escape(str)
@@ -36,37 +47,39 @@ endfunction
 function! s:show_title(no, title)
   let title = s:escape(a:title)
   let width = &columns - 23
-  echohl MoreMsg | echon "\rtesting #".printf('%03d', a:no)
-  echohl None | echon ': ' . (len(title) < width ? (title.repeat(' ', width-len(title))) : strpart(title, 0, width)) . ' ... '
+  echon "\r"
+  echohl MoreMsg | call s:logn('testing #'.printf('%03d', a:no))
+  echohl None | call s:logn(': '.(len(title) < width ? (title.' '.repeat('.', width-len(title)+1)) : strpart(title, 0, width+2)).'... ')
 endfunction
 
 function! s:show_skip(no, title)
   let title = s:escape(a:title)
   let width = &columns - 23
-  echohl WarningMsg | echon "\rskipped #".printf('%03d', a:no)
-  echohl None | echon ': ' . (len(title) < width ? (title.repeat(' ', width-len(title))) : strpart(title, 0, width)) . ' ... '
+  echon "\r"
+  echohl WarningMsg | call s:logn('skipped #'.printf('%03d', a:no))
+  echohl None | call s:logn(': '.(len(title) < width ? (title.' '.repeat('.', width-len(title)+1)) : strpart(title, 0, width+2)).'... ')
   echo ''
 endfunction
 
 function! s:show_ok()
-  echohl Title | echon "ok\n" | echohl None
+  echohl Title | call s:logn('ok') | echohl None
   echo ''
 endfunction
 
 function! s:show_ng(no, expect, got)
-  echohl WarningMsg | echon "ng\n" | echohl None
-  echohl ErrorMsg | echo 'failed test #'.a:no | echohl None
+  echohl WarningMsg | call s:logn('ng') | echohl None
+  echohl ErrorMsg | call s:log('failed test #'.a:no) | echohl None
   set more
-  echohl WarningMsg | echo printf('expect(%d):', len(a:expect)) | echohl None
+  echohl WarningMsg | call s:log(printf('expect(%d):', len(a:expect))) | echohl None
   echo join(split(a:expect, "\n", 1), "|\n")
-  echohl WarningMsg | echo printf('got(%d):', len(a:got)) | echohl None
-  echo join(split(a:got, "\n", 1), "|\n")
+  echohl WarningMsg | call s:log(printf('got(%d):', len(a:got))) | echohl None
+  call s:log(join(split(a:got, "\n", 1), "|\n"))
   let cs = split(a:expect, '\zs')
   for c in range(len(cs))
     if c < len(a:got)
       if a:expect[c] != a:got[c]
-        echohl WarningMsg | echo 'differ at:' | echohl None
-        echo a:expect[c :-1]
+        echohl WarningMsg | call s:log('differ at:') | echohl None
+        call s:log(a:expect[c :-1])
         break
       endif
     endif
@@ -109,6 +122,7 @@ function! s:test(...)
         if stridx(query, '$$$$') != -1
           silent! 1new
           silent! exe 'setlocal ft='.testgroup.type
+          EmmetInstall
           silent! let key = matchstr(query, '.*\$\$\$\$\zs.*\ze\$\$\$\$')
           if len(key) > 0
             exe printf('let key = "%s"', key)
@@ -155,8 +169,9 @@ function! s:test(...)
   endfor
 endfunction
 
-function! s:do_tests(...)
+function! s:do_tests(bang, ...)
   try
+    let s:logging = a:bang
     if exists('g:user_emmet_settings')
       let s:old_user_emmet_settings = g:user_emmet_settings
     endif
@@ -166,12 +181,21 @@ function! s:do_tests(...)
     let &more = 0
     call call('s:test', a:000)
     call s:show_done()
+    if a:bang == '!'
+      qall!
+    endif
   catch
     echohl ErrorMsg | echomsg v:exception | echohl None
+    if a:bang == '!'
+      cquit!
+    endif
   finally
     let &more=oldmore
     if exists('s:old_user_emmet_settings')
       let g:user_emmet_settings = s:old_user_emmet_settings
+    endif
+    if exists('s:old_user_emmet_install_global')
+      let g:user_emmet_install_global = s:old_user_emmet_install_global
     endif
   endtry
 endfunction
@@ -190,7 +214,7 @@ function! s:emmet_unittest_complete(arglead, cmdline, cmdpos)
   return []
 endfunction
 
-command! -nargs=* -complete=customlist,<SID>emmet_unittest_complete EmmetUnitTest call s:do_tests(<f-args>)
+command! -bang -nargs=* -complete=customlist,<SID>emmet_unittest_complete EmmetUnitTest call s:do_tests("<bang>", <f-args>)
 if s:sfile == expand('%:p')
   EmmetUnitTest
 endif
@@ -298,11 +322,11 @@ finish
         },
         {
           'query': "blockquote>b>i<<b",
-          'result': "<blockquote><b><i></i></b></blockquote>\n<b></b>\n",
+          'result': "<blockquote>\n\t<b><i></i></b>\n</blockquote>\n<b></b>\n",
         },
         {
           'query': "blockquote>b>i^^b",
-          'result': "<blockquote><b><i></i></b></blockquote>\n<b></b>\n",
+          'result': "<blockquote>\n\t<b><i></i></b>\n</blockquote>\n<b></b>\n",
         },
         {
           'query': "a[href=foo][class=bar]",
@@ -333,19 +357,19 @@ finish
           'result': "<table>\n\t<tr>\n\t\t<td id=\"foo\" class=\"name\"></td>\n\t\t<td></td>\n\t\t<td></td>\n\t\t<td></td>\n\t</tr>\n</table>\n",
         },
         {
-          'query': "div#header + div#footer",
+          'query': "div#header+div#footer",
           'result': "<div id=\"header\"></div>\n<div id=\"footer\"></div>\n",
         },
         {
-          'query': "#header + div#footer",
+          'query': "#header+div#footer",
           'result': "<div id=\"header\"></div>\n<div id=\"footer\"></div>\n",
         },
         {
-          'query': "#header > ul > li < p{Footer}",
+          'query': "#header>ul>li<p{Footer}",
           'result': "<div id=\"header\">\n\t<ul>\n\t\t<li></li>\n\t</ul>\n\t<p>Footer</p>\n</div>\n",
         },
         {
-          'query': "#header > ul > li ^ p{Footer}",
+          'query': "#header>ul>li^p{Footer}",
           'result': "<div id=\"header\">\n\t<ul>\n\t\t<li></li>\n\t</ul>\n\t<p>Footer</p>\n</div>\n",
         },
         {
@@ -557,6 +581,14 @@ finish
           'query': "<div>\n\t<span$$$$\\<c-y>j$$$$/>\n</div>",
           'result': "<div>\n\t<span></span>\n</div>",
         },
+        {
+          'query': "<div onclick=\"javascript:console.log(Date.now() % 1000 > 500)\">test$$$$\\<c-y>j$$$$/>\n</div>",
+          'result': "<div onclick=\"javascript:console.log(Date.now() % 1000 > 500)\" />",
+        },
+        {
+          'query': "<div>\n\t<some-tag$$$$\\<c-y>j$$$$/>\n</div>",
+          'result': "<div>\n\t<some-tag></some-tag>\n</div>",
+        },
       ],
     },
     {
@@ -648,6 +680,15 @@ finish
         {
           'query': "<h$$$$\\<c-y>u.global\\<cr>$$$$3></h3>",
           'result': "<h3 class=\"global\"></h3>",
+        },
+      ],
+    },
+    {
+      'name': 'base value',
+      'tests': [
+        {
+          'query': "ul>li#id$@0*3",
+          'result': "<ul>\n\t<li id=\"id0\"></li>\n\t<li id=\"id1\"></li>\n\t<li id=\"id2\"></li>\n</ul>\n",
         },
       ],
     },
@@ -804,7 +845,7 @@ finish
       ],
     },
     {
-      'name': 'expand abbreviation',
+      'name': 'split join',
       'tests': [
         {
           'query': "%a foo\n  bar$$$$\\<c-y>j$$$$",
@@ -1014,6 +1055,68 @@ finish
         {
           'query': "{(bg+)+c$$$$}",
           'result': "{background: $$$$#fff url() 0 0 no-repeat;\ncolor: #000;}",
+        },
+      ],
+    },
+  ],
+  'dummy': "}}}"},
+{ 'test-jade': "{{{",
+  'type': 'jade',
+  'categories': [
+    {
+      'name': 'expand abbreviation',
+      'tests': [
+        {
+          'query': "!!!$$$$\\<c-y>,$$$$",
+          'result': "doctype html\n\n",
+        },
+        {
+          'query': "span.my-span$$$$\\<c-y>,$$$$",
+          'result': "span.my-span",
+        },
+      ],
+    },
+  ],
+  'dummy': "}}}"},
+{ 'test-pug': "{{{",
+  'type': 'pug',
+  'categories': [
+    {
+      'name': 'expand abbreviation',
+      'tests': [
+        {
+          'query': "!!!$$$$\\<c-y>,$$$$",
+          'result': "doctype html\n\n",
+        },
+        {
+          'query': "span.my-span$$$$\\<c-y>,$$$$",
+          'result': "span.my-span",
+        },
+        {
+          'query': "input$$$$\\<c-y>,text$$$$",
+          'result': "input(type=\"text\")",
+        },
+      ],
+    },
+  ],
+  'dummy': "}}}"},
+{ 'test-jsx': "{{{",
+  'type': 'javascript.jsx',
+  'categories': [
+    {
+      'name': 'expand abbreviation',
+      'tests': [
+        {
+          'query': "img$$$$\\<c-y>,$$$$",
+          'result': "<img src=\"\" alt=\"\" />",
+        },
+        {
+          'query': "span.my-span$$$$\\<c-y>,$$$$",
+          'result': "<span className=\"my-span\"></span>",
+        },
+        {
+          'query': "function() { return span.my-span$$$$\\<c-y>,$$$$; }",
+          'result': "function() { return <span className=\"my-span\"></span>; }",
         },
       ],
     },

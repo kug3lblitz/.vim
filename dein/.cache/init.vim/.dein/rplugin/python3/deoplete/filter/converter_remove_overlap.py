@@ -5,34 +5,48 @@
 # ============================================================================
 
 import re
-from .base import Base
+import typing
+
+from deoplete.base.filter import Base
+from deoplete.util import Nvim, UserContext, Candidates
 
 
 class Filter(Base):
-    def __init__(self, vim):
+    def __init__(self, vim: Nvim) -> None:
         super().__init__(vim)
 
         self.name = 'converter_remove_overlap'
         self.description = 'remove overlap converter'
 
-    def filter(self, context):
-        m = re.match('\S+', context['next_input'])
+    def filter(self, context: UserContext) -> Candidates:
+        if not context['next_input']:
+            return context['candidates']  # type: ignore
+        m = re.match(r'\S+', context['next_input'])
         if not m:
-            return context['candidates']
-        next = m.group(0)
-        for [overlap, candidate] in [
-                [x, y] for x, y
-                in [[overlap_length(x['word'], next), x]
+            return context['candidates']  # type: ignore
+        next_input_words = [x for x in re.split(
+            r'([a-zA-Z_]+|\W)', m.group(0)) if x]
+
+        check_pairs = []
+        if self.vim.call('searchpair', '(', '', ')', 'bnw'):
+            check_pairs.append(['(', ')'])
+        if self.vim.call('searchpair', '[', '', ']', 'bnw'):
+            check_pairs.append(['[', ']'])
+
+        for [overlap, candidate, word] in [
+                [x, y, y['word']] for x, y
+                in [[overlap_length(x['word'], next_input_words), x]
                     for x in context['candidates']] if x > 0]:
+            if [x for x in check_pairs if x[0] in word and x[1] in word]:
+                continue
             if 'abbr' not in candidate:
-                candidate['abbr'] = candidate['word']
-            candidate['word'] = candidate['word'][: -overlap]
-        return [x for x in context['candidates']
-                if x['word'] != context['complete_str']]
+                candidate['abbr'] = word
+            candidate['word'] = word[: -overlap]
+        return context['candidates']  # type: ignore
 
 
-def overlap_length(left, right):
-    pos = len(right)
-    while pos > 0 and not left.endswith(right[: pos]):
+def overlap_length(left: str, next_input_words: typing.List[str]) -> int:
+    pos = len(next_input_words)
+    while pos > 0 and not left.endswith(''.join(next_input_words[:pos])):
         pos -= 1
-    return pos
+    return len(''.join(next_input_words[:pos]))

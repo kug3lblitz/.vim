@@ -4,50 +4,67 @@
 # License: MIT license
 # ============================================================================
 
-from .base import Base
+import typing
 
-from itertools import chain
+from deoplete.base.source import Base
 from deoplete.util import parse_buffer_pattern, getlines
+from deoplete.util import Nvim, UserContext, Candidates
 
 
 class Source(Base):
 
-    def __init__(self, vim):
+    def __init__(self, vim: Nvim) -> None:
         super().__init__(vim)
 
         self.name = 'buffer'
         self.mark = '[B]'
-        self.__buffers = {}
-        self.__max_lines = 5000
+        self.events = ['Init', 'BufReadPost', 'BufWritePost']
+        self.vars = {
+            'require_same_filetype': True,
+        }
 
-    def on_event(self, context):
-        bufnr = context['bufnr']
-        if (bufnr not in self.__buffers or
-                context['event'] == 'BufWritePost'):
-            self.__make_cache(context, bufnr)
+        self._limit = 1000000
+        self._buffers: typing.Dict[int, typing.Any] = {}
+        self._max_lines = 5000
 
-    def gather_candidates(self, context):
-        self.on_event(context)
-        tab_bufnrs = [x.buffer.number for x
-                      in self.vim.current.tabpage.windows]
-        same_filetype = context['vars'].get(
-            'deoplete#buffer#require_same_filetype', True)
-        candidates = (x['candidates'] for x in self.__buffers.values()
-                      if not same_filetype or
-                      x['filetype'] in context['filetypes'] or
-                      x['filetype'] in context['same_filetypes'] or
-                      x['bufnr'] in tab_bufnrs)
-        return [{'word': x} for x in chain(*candidates)]
+    def on_event(self, context: UserContext) -> None:
+        self._make_cache(context)
 
-    def __make_cache(self, context, bufnr):
+        tab_bufnrs = self.vim.call('tabpagebuflist')
+        self._buffers = {
+            x['bufnr']: x for x in self._buffers.values()
+            if x['bufnr'] in tab_bufnrs or
+            self.vim.call('buflisted', x['bufnr'])
+        }
+
+    def gather_candidates(self, context: UserContext) -> Candidates:
+        tab_bufnrs = self.vim.call('tabpagebuflist')
+        same_filetype = self.get_var('require_same_filetype')
+        return {'sorted_candidates': [  # type: ignore
+            x['candidates'] for x in self._buffers.values()
+            if not same_filetype or
+            x['filetype'] in context['filetypes'] or
+            x['filetype'] in context['same_filetypes'] or
+            x['bufnr'] in tab_bufnrs
+        ]}
+
+    def _make_cache(self, context: UserContext) -> None:
+        # Bufsize check
+        size = self.vim.call('line2byte',
+                             self.vim.call('line', '$') + 1) - 1
+        if size > self._limit:
+            return
+
         try:
-            self.__buffers[bufnr] = {
-                'bufnr': bufnr,
-                'filetype': context['filetype'],
-                'candidates': parse_buffer_pattern(
-                    getlines(self.vim),
-                    context['keyword_patterns'],
-                    context['complete_str'])
+            self._buffers[context['bufnr']] = {
+                'bufnr': context['bufnr'],
+                'filetype': self.get_buf_option('filetype'),
+                'candidates': [
+                    {'word': x} for x in
+                    sorted(parse_buffer_pattern(getlines(self.vim),
+                                                context['keyword_pattern']),
+                           key=str.lower)
+                ]
             }
         except UnicodeDecodeError:
-            return []
+            return

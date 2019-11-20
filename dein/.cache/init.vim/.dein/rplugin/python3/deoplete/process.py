@@ -4,71 +4,30 @@
 # License: MIT license
 # ============================================================================
 
-import subprocess
-from threading import Thread
-from queue import Queue
-from time import time
-import os
+import asyncio
+import typing
 
 
-class Process(object):
-    def __init__(self, commands, context, cwd):
-        startupinfo = None
-        if os.name == 'nt':
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        self.__proc = subprocess.Popen(commands,
-                                       stdin=subprocess.DEVNULL,
-                                       stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE,
-                                       startupinfo=startupinfo,
-                                       cwd=cwd)
-        self.__eof = False
-        self.__context = context
-        self.__queue_out = Queue()
-        self.__thread = Thread(target=self.enqueue_output)
-        self.__thread.start()
+class Process(asyncio.SubprocessProtocol):
 
-    def eof(self):
-        return self.__eof
+    def __init__(self, plugin: typing.Any) -> None:
+        self._plugin = plugin
+        self._vim = plugin._vim
 
-    def kill(self):
-        if not self.__proc:
+    def connection_made(self, transport: typing.Any) -> None:
+        self._unpacker = self._plugin._connect_stdin(
+            transport.get_pipe_transport(0))
+
+    def pipe_data_received(self, fd: int, data: typing.Any) -> None:
+        if fd == 2:
+            # stderr
+            self._plugin._queue_err.put(f'stderr from child process:{data}')
             return
-        self.__proc.kill()
-        self.__proc.wait()
-        self.__proc = None
-        self.__queue_out = None
-        self.__thread.join(1.0)
-        self.__thread = None
 
-    def enqueue_output(self):
-        for line in self.__proc.stdout:
-            if not self.__queue_out:
-                return
-            self.__queue_out.put(
-                line.decode(self.__context['encoding'],
-                            errors='replace').strip('\r\n'))
+        unpacker = self._unpacker
+        unpacker.feed(data)
+        for child_out in unpacker:
+            self._plugin._queue_out.put(child_out)
 
-    def communicate(self, timeout):
-        if not self.__proc:
-            return ([], [])
-
-        start = time()
-        outs = []
-
-        while not self.__queue_out.empty() and time() < start + timeout:
-            outs.append(self.__queue_out.get_nowait())
-
-        if self.__thread.is_alive() or not self.__queue_out.empty():
-            return (outs, [])
-
-        _, errs = self.__proc.communicate(timeout=timeout)
-        errs = errs.decode(self.__context['encoding'],
-                           errors='replace').splitlines()
-        self.__eof = True
-        self.__proc = None
-        self.__thread = None
-        self.__queue = None
-
-        return (outs, errs)
+    def process_exited(self) -> None:
+        self._plugin._queue_err.put('The child process is exited!')
