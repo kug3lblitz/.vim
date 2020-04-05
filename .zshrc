@@ -99,5 +99,6 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vi="nvim"
 alias tmux="tmux -2 -u"
+alias show_batteryinfo="upower -i /org/freedesktop/UPower/devices/battery_BAT0"
 # enable vim mode
 bindkey -v
