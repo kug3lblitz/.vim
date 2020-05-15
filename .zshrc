@@ -7,7 +7,7 @@ export ZSH="/home/patrick/.oh-my-zsh"
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="robbyrussell"
 
 # Set list of themes to pick from when loading at random
@@ -100,5 +100,8 @@ source $ZSH/oh-my-zsh.sh
 alias vi="nvim"
 alias tmux="tmux -2 -u"
 alias show_batteryinfo="upower -i /org/freedesktop/UPower/devices/battery_BAT0"
+alias ree="upgrade_oh_my_zsh && yay -Syu"
+alias tendies="sudo reflector --country 'United States' --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
+alias fuck="thefuck"
 # enable vim mode
 bindkey -v
