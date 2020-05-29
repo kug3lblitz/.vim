@@ -1,0 +1,33 @@
+---
+ip: "192.168.10.10"
+memory: 2048
+cpus: 2
+provider: virtualbox
+
+authorize: ~/.ssh/id_rsa.pub
+
+keys:
+    - ~/.ssh/id_rsa
+
+folders:
+    - map: /home/patrick/Documents/projects/lrvl_reservations/
+      to: /home/vagrant/code
+
+sites:
+    - map: reservations.local
+      to: /home/vagrant/code/reservations/public
+
+databases:
+    - homestead
+
+features:
+    - mariadb: true
+    - ohmyzsh: false
+    - webdriver: false
+
+# ports:
+#     - send: 50000
+#       to: 5000
+#     - send: 7777
+#       to: 777
+#       protocol: udp
