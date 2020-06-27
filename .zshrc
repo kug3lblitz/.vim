@@ -102,9 +102,9 @@ alias tmux="tmux -2 -u"
 alias showbatt="upower -i /org/freedesktop/UPower/devices/battery_BAT0"
 alias ree="upgrade_oh_my_zsh && yay -Syu"
 alias tendies="sudo reflector --country 'United States' --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
-alias startprinting="sudo systemctl start org.cups.cupsd.service && systemctl status org.cups.cupsd.service"
-alias stopprinting="sudo systemctl stop org.cups.cupsd.service && systemctl status org.cups.cupsd.service"
-alias checkprinting="systemctl status org.cups.cupsd.service"
+alias sp="sudo systemctl start org.cups.cupsd.service && systemctl status org.cups.cupsd.service"
+alias sg="sudo systemctl stop org.cups.cupsd.service && systemctl status org.cups.cupsd.service"
+alias checkprint="systemctl status org.cups.cupsd.service"
 eval $(thefuck --alias fuck)
 # enable vim mode
 bindkey -v
