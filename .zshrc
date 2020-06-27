@@ -99,9 +99,12 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vi="nvim"
 alias tmux="tmux -2 -u"
-alias show_batteryinfo="upower -i /org/freedesktop/UPower/devices/battery_BAT0"
+alias showbatt="upower -i /org/freedesktop/UPower/devices/battery_BAT0"
 alias ree="upgrade_oh_my_zsh && yay -Syu"
 alias tendies="sudo reflector --country 'United States' --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
-alias fuck="thefuck"
+alias startprinting="sudo systemctl start org.cups.cupsd.service && systemctl status org.cups.cupsd.service"
+alias stopprinting="sudo systemctl stop org.cups.cupsd.service && systemctl status org.cups.cupsd.service"
+alias checkprinting="systemctl status org.cups.cupsd.service"
+eval $(thefuck --alias fuck)
 # enable vim mode
 bindkey -v
