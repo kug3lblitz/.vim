@@ -13,7 +13,8 @@
 
 ### 3. Run Installer.sh to install dein
 
-* `sh installer.sh dein` to install dein package manager
+* `rm -r dein/ && mkdir dein`
+* `sh installer.sh dein/` to install dein package manager
 
 ### 4. Install Vim/Nvim plugins with dein
 
@@ -22,3 +23,5 @@
 ### 5. Periodically update plugins
 
 * enter `call dein#update()` from command mode to periodically update plugins
+
+### 6. Add in desired airline color files

@@ -28,7 +28,6 @@ if dein#load_state('/home/patrick/.vim/dein')
   call dein#add('vim-airline/vim-airline')
   call dein#add('vim-airline/vim-airline-themes')
   call dein#add('gko/vim-coloresque')
-  call dein#add('digitaltoad/vim-pug')
   call dein#add('Shougo/deoplete.nvim')
   call dein#add('easymotion/vim-easymotion')
   call dein#add('mxw/vim-jsx')
@@ -83,18 +82,12 @@ let g:syntastic_check_on_open = 0
 
 "" Syntastic doesn't check files on save+exit
 let g:syntastic_check_on_wq = 0
-
 let g:syntastic_check_on_w = 0
 
 " Colorschemes
 syntax enable
-"solarized colorscheme
-"let g:solarized_termcolors=256
-"let g:solarized_contrast = "high"
-"let g:solarized_termtrans = 1
 set background=dark
-colorscheme dracula
-let g:gruvbox_termcolors=256
+colorscheme molokai
 set noswapfile
 
 "easymotion
@@ -110,7 +103,8 @@ set listchars=tab:}.,trail:≠,nbsp:•,precedes:…,extends:↲
 "the line below will toggle airline
 
 set laststatus=2
-let g:airline_theme='dracula'
+set termguicolors
+let g:airline_theme='molokai'
 set t_Co=256
 "let g:airline_powerline_fonts = 1
 "let g:Powerline_symbols = 'fancy'
