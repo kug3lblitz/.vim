@@ -31,6 +31,8 @@ if dein#load_state('/home/patrick/.vim/dein')
   call dein#add('Shougo/deoplete.nvim')
   call dein#add('easymotion/vim-easymotion')
   call dein#add('mxw/vim-jsx')
+  " if using vim instead of nvim, deoplete compat for > 8.2.1978
+  call dein#add('roxma/vim-hug-neovim-rpc')
   " You can specify revision/branch/tag.
   "call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
 
