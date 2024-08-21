@@ -99,7 +99,6 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias vi="nvim"
 alias tmux="tmux -2 -u"
-alias ree="upgrade_oh_my_zsh && yay -Syu"
 alias tendies="sudo reflector --country 'United States' --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
 eval $(thefuck --alias fuck)
 # enable vim mode

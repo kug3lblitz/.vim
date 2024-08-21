@@ -1,6 +1,9 @@
 # Setting up Vim/Nvim
 
-### 1. Install Vim/Nvim from origin of choice
+### 1. Install Vim/Nvim from origin of choice, configure git
+* `git config --global user.name "user name"`
+* `git config --global user.email "user@email.com"`
+* `git config --global core.editor /usr/bin/nvim`
 
 ### 2. Link .vim/ and .vimrc to Nvim config 
 
@@ -16,12 +19,15 @@
 * `rm -r dein/ && mkdir dein`
 * `sh installer.sh dein/` to install dein package manager
 
-### 4. Install Vim/Nvim plugins with dein
+### 4. Install pynvim
+* `pacman -S python-pynvim`
+
+### 5. Install Vim/Nvim plugins with dein
 
 * Open vim/nvim, enter `call dein#install()` from command mode
 
-### 5. Periodically update plugins
+### 6. Periodically update plugins
 
 * enter `call dein#update()` from command mode to periodically update plugins
 
-### 6. Add in desired airline color files
+### 7. Add in desired airline color files

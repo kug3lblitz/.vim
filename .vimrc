@@ -149,9 +149,3 @@ let g:airline_symbols.paste = 'Þ'
 let g:airline_symbols.paste = '∥'
 let g:airline_symbols.whitespace = 'Ξ'
 let g:tmuxline_powerline_separators = 0
-
-
-"if using neovim, link to .config, as below
-
-"ln -s ~/.vim ~/.config/nvim
-"ln -s ~/.vimrc ~/.config/nvim/init.vim
