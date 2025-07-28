@@ -87,7 +87,7 @@ set_prompt() {
 
     # Main prompt: time user@host directory git_info
     # PS1="${GREEN}┌─[${RESET}${CYAN}\u${RESET}${GREEN}@${RESET}${CYAN}\h${RESET}${GREEN}]─[${RESET}${BLUE}\w${RESET}${GREEN}]${RESET} ${git_info}\n${GREEN}└─▶${RESET} "
-    PS1="${GREEN}┌─[${RESET}${PURPLE}\t${RESET}${GREEN}]─[${RESET}${CYAN}\u${RESET}${GREEN}@${RESET}${CYAN}\h${RESET}${GREEN}]─[${RESET}${BLUE}\w${RESET}${GREEN}]${RESET} ${git_info}\n${GREEN}└─▶${RESET} "
+    PS1="${GREEN}┌─[${RESET}${YELLOW}\t${RESET}${GREEN}]─[${RESET}${RED}\w${RESET}${GREEN}]${RESET} ${git_info}\n${GREEN}└─▶${RESET} "
 }
 
 # Update prompt before each command
