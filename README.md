@@ -31,3 +31,11 @@
 * enter `call dein#update()` from command mode to periodically update plugins
 
 ### 7. Add in desired airline color files
+
+
+Also - nice little one liner for finding recent files globally (any pngs, in this example):
+```
+
+find / -type f -name "*.png" -printf "%T@ %p\n" 2>/dev/null | sort -n | tail -n 5
+
+```
