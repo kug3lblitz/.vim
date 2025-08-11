@@ -51,6 +51,9 @@ git_status() {
             local ahead=$(git rev-list @{u}..HEAD --count 2>/dev/null)
             local behind=$(git rev-list HEAD..@{u} --count 2>/dev/null)
 
+            ahead=${ahead:-0}
+            behind=${behind:-0}
+
             if [ "$ahead" -gt 0 ]; then
                 status="${status}↑${ahead}"
             fi
