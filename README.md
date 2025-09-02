@@ -21,6 +21,8 @@
 
 ### 4. Install pynvim
 * `pacman -S python-pynvim`
+or
+* `xbps-install -S python3-neovim`
 
 ### 5. Install Vim/Nvim plugins with dein
 
