@@ -1,0 +1,7 @@
+#!/bin/sh
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+
+# initialize audio script, disable and start separately if this causes problems
+exec ./initAudio
+
+exec sway
