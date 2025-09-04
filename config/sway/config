@@ -43,12 +43,34 @@ bindsym $mod+Shift+0 move container to workspace number 10
 
 # screenshots
 # entire desktop
-bindsym Print exec grim ~/Pictures/screenshots/$(date + '%Y-%m-%d-%H%M%S.png')
+bindsym Print exec grim ~/Pictures/Screenshots/$(date + '%Y-%m-%d-%H%M%S.png')
 # selected area
-bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/screenshots/$(date + '%Y-%m-%d-%H%M%S.png')
+bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/Screenshots/$(date + '%Y-%m-%d-%H%M%S.png')
+
 
 bar {
 	position top
 	status_command i3status
+	colors {
+		background #000000
+		
+		# The workspace you are currently on will be red
+		focused_workspace #FF0000 #FF0000 #FFFFFF
+
+		# A workspace with a window on it (not focused)
+		active_workspace #FF0000 #FF0000 #FFFFFF
+		
+		# A workspace with a window that needs attention
+		urgent_workspace #FF0000 #FF0000 #FFFFFF
+	}
 }
 
+
+# set wallpaper
+exec_always swaybg -i ~/Pictures/wallpaper/tropical-beach-70.jpg
+
+# remove window titles, but allow visual boundary
+for_window [class="^."] border pixel 2
+#for_window [app_id="foot"] title_bar none
+client.focused      #dd0000 #dd0000 #dd0000 #dd0000
+client.unfocused    #7a7a7a #7a7a7a #7a7a7a #7a7a7a
