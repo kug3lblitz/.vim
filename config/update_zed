@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "Updating Zed..."
+curl -f https://zed.dev/install.sh | sh
+echo "Zed updated successfully."
