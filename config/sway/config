@@ -67,10 +67,11 @@ bar {
 
 
 # set wallpaper
-exec_always swaybg -i ~/Pictures/wallpaper/tropical-beach-70.jpg
+exec_always swaybg -i ~/Pictures/wallpaper/qouhfweoc0id1.jpeg
 
 # remove window titles, but allow visual boundary
-for_window [class="^."] border pixel 2
+for_window [app_id="foot"] border pixel 1
+for_window [class="^."] border pixel 1
 #for_window [app_id="foot"] title_bar none
 client.focused      #dd0000 #dd0000 #dd0000 #dd0000
 client.unfocused    #7a7a7a #7a7a7a #7a7a7a #7a7a7a

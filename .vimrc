@@ -106,7 +106,7 @@ set listchars=tab:}.,trail:≠,nbsp:•,precedes:…,extends:↲
 
 set laststatus=2
 set termguicolors
-let g:airline_theme='zenburn'
+let g:airline_theme='powerlineish'
 set t_Co=256
 "let g:airline_powerline_fonts = 1
 "let g:Powerline_symbols = 'fancy'
