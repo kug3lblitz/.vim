@@ -1,0 +1,5 @@
+#!/bin/sh
+export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+
+exec dbus-run-session -- sway

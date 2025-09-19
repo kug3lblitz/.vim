@@ -43,10 +43,10 @@ bindsym $mod+Shift+0 move container to workspace number 10
 
 # screenshots
 # entire desktop
-bindsym Print exec grim ~/Pictures/Screenshots/$(date + '%Y-%m-%d-%H%M%S.png')
-# selected area
-bindsym $mod+Print exec grim -g "$(slurp)" ~/Pictures/Screenshots/$(date + '%Y-%m-%d-%H%M%S.png')
+bindsym Print exec /usr/bin/grim ~/Pictures/Screenshots/$(date +'%Y-%m-%d-%H%M%S.png')
 
+# selected area
+bindsym $mod+Print exec /usr/bin/grim -g "$(/usr/bin/slurp)" ~/Pictures/Screenshots/$(date +'%Y-%m-%d-%H%M%S.png')
 
 bar {
 	position top
@@ -67,7 +67,8 @@ bar {
 
 
 # set wallpaper
-exec_always swaybg -i ~/Pictures/wallpaper/qouhfweoc0id1.jpeg
+ exec_always swaybg -i ~/Pictures/wallpaper/aztrx254_synthwave_theme_colors_car_driving_into_a_city_epic_ci_5964a55b-87c9-4cf8-ae6a-572a99752d53.png
+
 
 # remove window titles, but allow visual boundary
 for_window [app_id="foot"] border pixel 1
