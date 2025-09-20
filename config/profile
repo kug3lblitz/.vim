@@ -1,11 +1,20 @@
-# start ssh agent and add git key automatically
-# otherwise, you'd need to enter these commands manually each session
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_github
 . "$HOME/.cargo/env"
 
-# Start the SSH agent if it's not already running
-if [ -z "$SSH_AUTH_SOCK" ]; then
-    eval "$(ssh-agent -s)" > /dev/null
-    ssh-add /home/pickle/.ssh/id_github
+# Set up a long-running SSH agent session
+env=~/.ssh/agent.env
+
+# If the agent is already running and the file exists, use it
+if test -f "$env"; then
+    . "$env" > /dev/null
+fi
+
+# If the agent is not running (or the file was not sourced)
+if ! ssh-add -l > /dev/null 2>&1; then
+    # Kill any old agents and start a new one
+    ssh-agent -k > /dev/null
+    ssh-agent > "$env"
+    . "$env" > /dev/null
+
+    # Add your key automatically, set path accordingly
+    ssh-add /home/user/.ssh/id_github
 fi
