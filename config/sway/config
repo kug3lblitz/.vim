@@ -71,8 +71,8 @@ bar {
 
 
 # remove window titles, but allow visual boundary
-for_window [app_id="foot"] border pixel 1
-for_window [class="^."] border pixel 1
-#for_window [app_id="foot"] title_bar none
+default_border pixel 1
+titlebar_padding 1
+titlebar_border_thickness 0
 client.focused      #dd0000 #dd0000 #dd0000 #dd0000
 client.unfocused    #7a7a7a #7a7a7a #7a7a7a #7a7a7a
