@@ -1,5 +1,5 @@
-pipewire&
-sleep 5
 wireplumber&
+sleep 5
+pipewire&
 sleep 5
 pactl set-sink-volume @DEFAULT_SINK@ 95%
