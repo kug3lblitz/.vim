@@ -5,6 +5,10 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+
+# Source .profile if it exists
+[ -f ~/.profile ] && . ~/.profile
+
 # Detect OS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
@@ -29,41 +33,39 @@ parse_git_branch() {
     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
 }
 
-# Git status indicators
+# Git status indicators - simple compact signals
 git_status() {
-    local status=""
-    local branch=$(parse_git_branch)
-
-    if [ -n "$branch" ]; then
-        # Check for uncommitted changes
-        if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
-            status="${status}*"
-        fi
-
-        # Check for untracked files
-        if [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
-            status="${status}?"
-        fi
-
-        # Check if ahead/behind upstream
-        local upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
-        if [ -n "$upstream" ]; then
-            local ahead=$(git rev-list @{u}..HEAD --count 2>/dev/null)
-            local behind=$(git rev-list HEAD..@{u} --count 2>/dev/null)
-
-            ahead=${ahead:-0}
-            behind=${behind:-0}
-
-            if [ "$ahead" -gt 0 ]; then
-                status="${status}↑${ahead}"
-            fi
-            if [ "$behind" -gt 0 ]; then
-                status="${status}↓${behind}"
-            fi
-        fi
-
-        echo -n " ${status}"
+    # Return short compact status symbols for prompt
+    git rev-parse --is-inside-work-tree &>/dev/null || return
+    
+    local stat=""
+    
+    # Check for staged changes
+    if ! git diff --cached --quiet --ignore-submodules -- >/dev/null 2>&1; then
+        stat+="+"
     fi
+    
+    # Check for unstaged changes
+    if ! git diff --quiet --ignore-submodules -- >/dev/null 2>&1; then
+        stat+="*"
+    fi
+    
+    # Check for untracked files
+    if [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+        stat+="?"
+    fi
+    
+    # Check ahead/behind upstream
+    local upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+    if [ -n "$upstream" ]; then
+        local ahead=$(git rev-list @{u}..HEAD --count 2>/dev/null || echo 0)
+        local behind=$(git rev-list HEAD..@{u} --count 2>/dev/null || echo 0)
+        
+        [ "$ahead" -gt 0 ] && stat+="↑${ahead}"
+        [ "$behind" -gt 0 ] && stat+="↓${behind}"
+    fi
+    
+    echo -n " ${stat}"
 }
 
 # Custom prompt similar to bureau theme
@@ -220,6 +222,7 @@ alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commi
 # Custom aliases from .zshrc
 alias vi="nvim"
 alias tmux="tmux -2 -u"
+alias celar="clear"
 # Only add tendies alias on Arch Linux
 if [ -f /etc/arch-release ]; then
     alias tendies="sudo reflector --country 'United States' --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
@@ -285,3 +288,7 @@ fi
 
 # Add color to GCC warnings and errors
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# add rust binaries to path
+export PATH="$HOME/.cargo/bin:$PATH"
+. "$HOME/.cargo/env"
