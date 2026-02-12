@@ -292,3 +292,9 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 # add rust binaries to path
 export PATH="$HOME/.cargo/bin:$PATH"
 . "$HOME/.cargo/env"
+
+# add custom utility scripts to shell environment. The imperative below can be added to .profile, .xinitrc equivalent to persist between sessions
+export PATH="$HOME/.local/bin:$PATH"
+
+# I had to do this as well, for zed specifically
+# sudo ln -s /home/user/.local/zed.app/bin/zed /usr/local/bin/zed
