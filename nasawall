@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Configuration
+SAVE_DIR="$HOME/Pictures/wallpaper"
+mkdir -p "$SAVE_DIR"
+
+# 1. Fetch NASA data
+APOD_DATA=$(curl -s "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY")
+
+# 2. Extract URL and Date using jq
+URL=$(echo "$APOD_DATA" | jq -r '.hdurl // .url')
+DATE=$(echo "$APOD_DATA" | jq -r '.date')
+
+# 3. Download if it doesn't exist
+if [ ! -f "$SAVE_DIR/nasa_$DATE.jpg" ]; then
+    curl -s "$URL" -o "$SAVE_DIR/nasa_$DATE.jpg"
+    ln -sf "$SAVE_DIR/nasa_$DATE.jpg" "$SAVE_DIR/current_wallpaper.jpg"
+fi
+
+# 4. Set the wallpaper using swaybg
+# We kill any existing swaybg processes first to avoid stacking them
+pkill swaybg
+swaybg -i "$SAVE_DIR/current_wallpaper.jpg" -m fit &
+# swaybg -i "$SAVE_DIR/current_wallpaper.jpg" -m stretch &
