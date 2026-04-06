@@ -15,6 +15,16 @@ if ! ssh-add -l > /dev/null 2>&1; then
     ssh-agent > "$env"
     . "$env" > /dev/null
 
-    # Add your key automatically, set path accordingly
-    ssh-add /home/user/.ssh/id_github
+    # Add your key automatically
+    ssh-add /home/pickle/.ssh/id_github
+fi
+
+export PATH="$PATH:/home/pickle/.local/bin"
+
+# start gnome-keyring for sway
+if [ -x "$HOME/.local/bin/start-gnome-keyring.sh" ]; then
+  "$HOME/.local/bin/start-gnome-keyring.sh"
+  if [ -f "$XDG_RUNTIME_DIR/gnome-keyring-env" ]; then
+    . "$XDG_RUNTIME_DIR/gnome-keyring-env"
+  fi
 fi
