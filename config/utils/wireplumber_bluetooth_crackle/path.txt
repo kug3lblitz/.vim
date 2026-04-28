@@ -1,0 +1,5 @@
+/etc/pipewire/pipewire.conf.d/
+
+create file 99-bluetooth.conf in this path as root, then restart bluetooth.service.
+This will fix the crackle problem. If issues persist, you may try setting default.clock.quantum to 1024
+and max-quantum to 2048
