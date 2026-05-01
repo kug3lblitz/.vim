@@ -68,6 +68,19 @@ git_status() {
     echo -n " ${stat}"
 }
 
+# Python virtual environment indicator (venv/virtualenv)
+py_venv_status() {
+    # If no venv active, print nothing
+    [ -z "${VIRTUAL_ENV:-}" ] && return
+
+    # Show only the folder name of the venv path
+    local venv_name
+    venv_name="$(basename -- "$VIRTUAL_ENV")"
+
+    # Leading space included so it tacks on nicely
+    echo -n " ${CYAN}‹${GREEN}py:${YELLOW}${venv_name}${CYAN}›${RESET}"
+}
+
 # Custom prompt similar to bureau theme
 # Colors
 RESET='\[\033[0m\]'
@@ -90,9 +103,13 @@ set_prompt() {
         git_info="${CYAN}‹${YELLOW}${git_branch}${RED}${git_stat}${CYAN}›${RESET} "
     fi
 
+    local py_info="$(py_venv_status)"
+
     # Main prompt: time user@host directory git_info
     # PS1="${GREEN}┌─[${RESET}${CYAN}\u${RESET}${GREEN}@${RESET}${CYAN}\h${RESET}${GREEN}]─[${RESET}${BLUE}\w${RESET}${GREEN}]${RESET} ${git_info}\n${GREEN}└─▶${RESET} "
-    PS1="${GREEN}┌─[${RESET}${YELLOW}\t${RESET}${GREEN}]─[${RESET}${RED}\w${RESET}${GREEN}]${RESET} ${git_info}\n${GREEN}└─▶${RESET} "
+    # PS1="${GREEN}┌─[${RESET}${YELLOW}\t${RESET}${GREEN}]─[${RESET}${RED}\w${RESET}${GREEN}]${RESET} ${git_info}\n${GREEN}└─▶${RESET} "
+    PS1="${GREEN}┌─[${RESET}${YELLOW}\t${RESET}${GREEN}]─[${RESET}${RED}\w${RESET}${GREEN}]${RESET} ${git_info}${py_info}\n${GREEN}└─▶${RESET} "
+
 }
 
 # Update prompt before each command
