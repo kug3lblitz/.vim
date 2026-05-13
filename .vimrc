@@ -89,27 +89,27 @@ let g:syntastic_check_on_w = 0
 function! s:CleanBlame()
     let l:line = line('.')
     let l:file = expand('%')
-    " Get the blame for only the current line
     let l:raw = system('git blame -L ' . l:line . ',' . l:line . ' --date=relative ' . l:file)
     
-    " Check if we are actually in a git repo
     if v:shell_error
         echo "Not a git repository"
         return
     endif
 
-    " Parse the string: Find the first '(' and extract until the line number
-    " Format is usually: hash (Author Date line)
-    let l:match = matchlist(l:raw, '(\(.\{-}\)\s\+\(\d\+.\{-}ago\)\s\+\d\+)')
+    " Regex breakdown:
+    " \(\k\+\)          -> Captures the hash (keyword characters)
+    " .*(\(.\{-}\)\s\+  -> Skips to the ( and captures the author
+    " \(\d\+.\{-}ago\)  -> Captures the relative date
+    let l:match = matchlist(l:raw, '\(\k\+\).*(\(.\{-}\)\s\+\(\d\+.\{-}ago\)\s\+\d\+)')
     
     if len(l:match) > 0
-        echo l:match[1] . ' • ' . l:match[2]
+        " Show hash (first 7 chars), author, and date
+        echo strpart(l:match[1], 0, 7) . ' • ' . l:match[2] . ' • ' . l:match[3]
     else
         echo "Not committed yet"
     endif
 endfunction
 
-" Map it to gb (since leader is taken by EasyMotion)
 nnoremap <silent> gb :call <SID>CleanBlame()<CR>
 
 " Colorschemes
