@@ -315,3 +315,28 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # I had to do this as well, for zed specifically
 # sudo ln -s /home/user/.local/zed.app/bin/zed /usr/local/bin/zed
+
+# ssh agent
+# SSH Agent Setup
+export SSH_ENV="$HOME/.ssh/agent-environment"
+
+function start_agent {
+    echo "Initializing new SSH agent..."
+    /usr/bin/ssh-agent -s | sed 's/^echo/#echo/' > "${SSH_ENV}"
+    chmod 600 "${SSH_ENV}"
+    . "${SSH_ENV}" > /dev/null
+    /usr/bin/ssh-add ~/.ssh/id_ed25519
+    /usr/bin/ssh-add ~/.ssh/a_second_key
+}
+
+# Source SSH settings, if applicable
+if [ -f "${SSH_ENV}" ]; then
+    . "${SSH_ENV}" > /dev/null
+    # Check if the process ID is still running
+    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent > /dev/null || {
+        start_agent
+    }
+else
+    start_agent
+fi
+
