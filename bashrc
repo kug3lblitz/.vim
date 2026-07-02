@@ -240,6 +240,9 @@ alias gwip='git add -A; git rm $(git ls-files --deleted) 2> /dev/null; git commi
 alias vi="nvim"
 alias tmux="tmux -2 -u"
 alias celar="clear"
+# obviously you need to install chess-tui and gnuchess for this to work
+alias chess='chess-tui --engine-path "/usr/bin/gnuchess --uci"'
+
 # Only add tendies alias on Arch Linux
 if [ -f /etc/arch-release ]; then
     alias tendies="sudo reflector --country 'United States' --age 12 --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
