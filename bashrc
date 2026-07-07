@@ -242,6 +242,7 @@ alias tmux="tmux -2 -u"
 alias celar="clear"
 # obviously you need to install chess-tui and gnuchess for this to work
 alias chess='chess-tui --engine-path "/usr/bin/gnuchess --uci"'
+alias linkedin='echo "https://www.linkedin.com/in/patrick-werner-207573a2/" | xclip -selection clipboard'
 
 # Only add tendies alias on Arch Linux
 if [ -f /etc/arch-release ]; then
